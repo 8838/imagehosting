@@ -229,10 +229,11 @@
             width: 32px;
             height: 32px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0 auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         @media (prefers-color-scheme: dark) {
             .spinner {
@@ -241,8 +242,8 @@
             }
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         .max-files-notice {
             position: fixed;
@@ -346,6 +347,8 @@
                 imageUrl.className = 'image-url';
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
+                imageInfo.style.position = 'relative';
+                
                 const urlActions = document.createElement('div');
                 urlActions.className = 'url-actions';
                 urlActions.style.display = 'none';
