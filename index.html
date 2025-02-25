@@ -216,18 +216,21 @@
             opacity: 1;
         }
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #6a0dad;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6a0dad;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             animation: spin 1s linear infinite;
-            margin: 10px auto;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         @media (prefers-color-scheme: dark) {
             .spinner {
-                border: 3px solid #444;
-                border-top: 3px solid #9b6dff;
+                border: 4px solid #444;
+                border-top: 4px solid #9b6dff;
             }
         }
         @keyframes spin {
@@ -372,7 +375,7 @@
                 };
 
                 reader.readAsDataURL(file);
-                imageUrl.textContent = 'Waiting to upload...';
+                imageUrl.style.display = 'none';
             });
         }
 
@@ -390,7 +393,6 @@
             if (uploadQueue.length === 0 || activeUploads >= MAX_UPLOADS) return;
             const upload = uploadQueue.shift();
             activeUploads++;
-            upload.element.url.textContent = 'Uploading...';
             uploadImage(upload.file, upload.element);
         }
 
@@ -406,6 +408,7 @@
                 element.spinner.style.display = 'none';
                 if (data.url) {
                     element.url.textContent = data.url;
+                    element.url.style.display = 'block';
                     element.actions.style.display = 'flex';
                     const buttons = element.actions.querySelectorAll('.copy-btn');
                     buttons[0].onclick = () => copyToClipboard(data.url, buttons[0]);
@@ -413,6 +416,7 @@
                     buttons[2].onclick = () => copyToClipboard(`![image](${data.url})`, buttons[2]);
                 } else {
                     element.url.textContent = data.error || 'Upload failed';
+                    element.url.style.display = 'block';
                 }
                 activeUploads--;
                 processQueue();
@@ -421,6 +425,7 @@
                 console.error('Error:', error);
                 element.spinner.style.display = 'none';
                 element.url.textContent = 'An error occurred during upload';
+                element.url.style.display = 'block';
                 activeUploads--;
                 processQueue();
             });
