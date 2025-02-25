@@ -149,7 +149,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            overflow-y: auto;
         }
         .image-url {
             background-color: #f1f1f1;
@@ -167,19 +166,19 @@
         }
         .url-actions {
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* 横向排列按钮 */
             align-items: center;
-            gap: 1px;
+            gap: 3px; /* 缩小按钮间距 */
         }
         .copy-btn {
             background-color: #6a0dad;
             color: white;
-            padding: 6px 12px;
+            padding: 6px 10px; /* 减小内边距 */
             border: none;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px; /* 减小字体大小 */
             cursor: pointer;
-            min-width: 80px;
+            min-width: 60px; /* 设置最小宽度 */
             position: relative;
             transition: background-color 0.3s;
         }
@@ -254,6 +253,14 @@
             opacity: 1;
             transform: translateY(0);
         }
+        /* 移动设备适配 */
+        @media (max-width: 600px) {
+            .copy-btn {
+                padding: 4px 8px; /* 减小内边距 */
+                font-size: 10px; /* 减小字体 */
+                min-width: 50px; /* 减小最小宽度 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -267,7 +274,7 @@
     </form>
     <div id="imagesList"></div>
     <div id="maxFilesNotice" class="max-files-notice">Maximum 5 images allowed</div>
-    
+
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const imageInput = document.getElementById('imageInput');
@@ -276,12 +283,11 @@
         const uploadForm = document.getElementById('uploadForm');
         const imagesList = document.getElementById('imagesList');
         const maxFilesNotice = document.getElementById('maxFilesNotice');
-        
-        // Queue for handling uploads (max 5)
+
         const MAX_UPLOADS = 5;
         let uploadQueue = [];
         let activeUploads = 0;
-        
+
         uploadArea.addEventListener('click', () => imageInput.click());
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -293,10 +299,7 @@
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            
-            // Get files from drop event
             const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
-            
             if (droppedFiles.length > MAX_UPLOADS) {
                 showMaxFilesNotice();
                 handleImageSelection(droppedFiles.slice(0, MAX_UPLOADS));
@@ -304,10 +307,9 @@
                 handleImageSelection(droppedFiles);
             }
         });
-        
+
         imageInput.addEventListener('change', () => {
             const selectedFiles = Array.from(imageInput.files).filter(file => file.type.startsWith('image/'));
-            
             if (selectedFiles.length > MAX_UPLOADS) {
                 showMaxFilesNotice();
                 handleImageSelection(selectedFiles.slice(0, MAX_UPLOADS));
@@ -315,75 +317,52 @@
                 handleImageSelection(selectedFiles);
             }
         });
-        
+
         function showMaxFilesNotice() {
             maxFilesNotice.classList.add('show');
             setTimeout(() => {
                 maxFilesNotice.classList.remove('show');
             }, 3000);
         }
-        
+
         function handleImageSelection(files) {
             if (files.length === 0) return;
-            
-            // Clear previous images
             imagesList.innerHTML = '';
-            
             files.forEach(file => {
                 const reader = new FileReader();
-                
-                // Create image item container
                 const imageItem = document.createElement('div');
                 imageItem.className = 'image-item';
-                
-                // Create image preview
                 const imagePreview = document.createElement('div');
                 imagePreview.className = 'image-preview';
-                
-                // Create image info container
                 const imageInfo = document.createElement('div');
                 imageInfo.className = 'image-info';
-                
-                // Create URL container
                 const imageUrl = document.createElement('div');
                 imageUrl.className = 'image-url';
-                
-                // Create spinner
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
-                
-                // Create URL actions container
                 const urlActions = document.createElement('div');
                 urlActions.className = 'url-actions';
                 urlActions.style.display = 'none';
-                
-                // Create copy buttons
+
                 const copyUrlBtn = createCopyButton('URL');
                 const copyBBCodeBtn = createCopyButton('BBCode');
                 const copyMarkdownBtn = createCopyButton('Markdown');
-                
+
                 urlActions.appendChild(copyUrlBtn);
                 urlActions.appendChild(copyBBCodeBtn);
                 urlActions.appendChild(copyMarkdownBtn);
-                
-                // Assemble the structure
+
                 imageInfo.appendChild(imageUrl);
                 imageInfo.appendChild(spinner);
                 imageInfo.appendChild(urlActions);
-                
                 imageItem.appendChild(imagePreview);
                 imageItem.appendChild(imageInfo);
-                
-                // Add to document
                 imagesList.appendChild(imageItem);
-                
-                // Read file to display preview
+
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     imagePreview.appendChild(img);
-                    
-                    // Add to upload queue
                     uploadQueue.push({
                         file: file,
                         element: {
@@ -393,75 +372,52 @@
                             actions: urlActions
                         }
                     });
-                    
-                    // Start processing queue
                     processQueue();
                 };
-                
+
                 reader.readAsDataURL(file);
-                
-                // Set initial status
                 imageUrl.textContent = 'Waiting to upload...';
             });
         }
-        
+
         function createCopyButton(text) {
             const button = document.createElement('button');
             button.className = 'copy-btn';
             button.setAttribute('data-status', 'OK');
-            
             const span = document.createElement('span');
             span.textContent = text;
-            
             button.appendChild(span);
             return button;
         }
-        
+
         function processQueue() {
             if (uploadQueue.length === 0 || activeUploads >= MAX_UPLOADS) return;
-            
-            // Get next item from queue
             const upload = uploadQueue.shift();
             activeUploads++;
-            
-            // Update UI
             upload.element.url.textContent = 'Uploading...';
-            
-            // Upload the file
             uploadImage(upload.file, upload.element);
         }
-        
+
         function uploadImage(file, element) {
-            // Create FormData
             const formData = new FormData();
             formData.append('image', file);
-            
-            // Make API request
             fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                // Hide spinner
                 element.spinner.style.display = 'none';
-                
                 if (data.url) {
-                    // Success - show URL and copy buttons
                     element.url.textContent = data.url;
                     element.actions.style.display = 'flex';
-                    
-                    // Setup copy buttons
                     const buttons = element.actions.querySelectorAll('.copy-btn');
                     buttons[0].onclick = () => copyToClipboard(data.url, buttons[0]);
                     buttons[1].onclick = () => copyToClipboard(`[img]${data.url}[/img]`, buttons[1]);
                     buttons[2].onclick = () => copyToClipboard(`![image](${data.url})`, buttons[2]);
                 } else {
-                    // Error
                     element.url.textContent = data.error || 'Upload failed';
                 }
-                
-                // Process next item in queue
                 activeUploads--;
                 processQueue();
             })
@@ -469,13 +425,11 @@
                 console.error('Error:', error);
                 element.spinner.style.display = 'none';
                 element.url.textContent = 'An error occurred during upload';
-                
-                // Process next item in queue
                 activeUploads--;
                 processQueue();
             });
         }
-        
+
         async function copyToClipboard(text, button) {
             try {
                 await navigator.clipboard.writeText(text);
@@ -484,12 +438,11 @@
                 setCopyButtonState(button, 'Failed', '#f44336');
             }
         }
-        
+
         function setCopyButtonState(button, text, color) {
             button.dataset.status = text;
             button.style.backgroundColor = color;
             button.classList.add('showStatus');
-            
             setTimeout(() => {
                 button.style.backgroundColor = '';
                 button.classList.remove('showStatus');
