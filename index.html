@@ -149,6 +149,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            overflow-y: auto;
         }
         .image-url {
             background-color: #f1f1f1;
@@ -167,17 +168,18 @@
         .url-actions {
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 5px;
         }
         .copy-btn {
             background-color: #6a0dad;
             color: white;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
-            min-width: 90px;
+            min-width: 80px;
             position: relative;
             transition: background-color 0.3s;
         }
@@ -304,7 +306,6 @@
         });
         
         imageInput.addEventListener('change', () => {
-            imagesList.innerHTML = ''; // Clear previous images
             const selectedFiles = Array.from(imageInput.files).filter(file => file.type.startsWith('image/'));
             
             if (selectedFiles.length > MAX_UPLOADS) {
@@ -324,6 +325,9 @@
         
         function handleImageSelection(files) {
             if (files.length === 0) return;
+            
+            // Clear previous images
+            imagesList.innerHTML = '';
             
             files.forEach(file => {
                 const reader = new FileReader();
@@ -389,60 +393,107 @@
                             actions: urlActions
                         }
                     });
-
-                    // 上传文件
-                    uploadFile(file, imageUrl, spinner, urlActions);
+                    
+                    // Start processing queue
+                    processQueue();
                 };
+                
                 reader.readAsDataURL(file);
+                
+                // Set initial status
+                imageUrl.textContent = 'Waiting to upload...';
             });
         }
-
-        function createCopyButton(type) {
+        
+        function createCopyButton(text) {
             const button = document.createElement('button');
-            button.classList.add('copy-btn');
-            button.textContent = `Copy ${type}`;
-            button.addEventListener('click', () => copyToClipboard(type));
+            button.className = 'copy-btn';
+            button.setAttribute('data-status', 'OK');
+            
+            const span = document.createElement('span');
+            span.textContent = text;
+            
+            button.appendChild(span);
             return button;
         }
-
-        function copyToClipboard(type) {
-            const fileData = uploadQueue[uploadQueue.length - 1];
-            let url = fileData.url.textContent;
-            let textToCopy = '';
-
-            switch (type) {
-                case 'URL':
-                    textToCopy = url;
-                    break;
-                case 'BBCode':
-                    textToCopy = `[img]${url}[/img]`;
-                    break;
-                case 'Markdown':
-                    textToCopy = `![Image](${url})`;
-                    break;
-                default:
-                    break;
-            }
-
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Copied to clipboard!');
+        
+        function processQueue() {
+            if (uploadQueue.length === 0 || activeUploads >= MAX_UPLOADS) return;
+            
+            // Get next item from queue
+            const upload = uploadQueue.shift();
+            activeUploads++;
+            
+            // Update UI
+            upload.element.url.textContent = 'Uploading...';
+            
+            // Upload the file
+            uploadImage(upload.file, upload.element);
+        }
+        
+        function uploadImage(file, element) {
+            // Create FormData
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            // Make API request
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide spinner
+                element.spinner.style.display = 'none';
+                
+                if (data.url) {
+                    // Success - show URL and copy buttons
+                    element.url.textContent = data.url;
+                    element.actions.style.display = 'flex';
+                    
+                    // Setup copy buttons
+                    const buttons = element.actions.querySelectorAll('.copy-btn');
+                    buttons[0].onclick = () => copyToClipboard(data.url, buttons[0]);
+                    buttons[1].onclick = () => copyToClipboard(`[img]${data.url}[/img]`, buttons[1]);
+                    buttons[2].onclick = () => copyToClipboard(`![image](${data.url})`, buttons[2]);
+                } else {
+                    // Error
+                    element.url.textContent = data.error || 'Upload failed';
+                }
+                
+                // Process next item in queue
+                activeUploads--;
+                processQueue();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                element.spinner.style.display = 'none';
+                element.url.textContent = 'An error occurred during upload';
+                
+                // Process next item in queue
+                activeUploads--;
+                processQueue();
             });
         }
-
-        function uploadFile(file, imageUrl, spinner, urlActions) {
-            // 模拟上传
-            spinner.style.display = 'block';
-
+        
+        async function copyToClipboard(text, button) {
+            try {
+                await navigator.clipboard.writeText(text);
+                setCopyButtonState(button, 'OK', '#4CAF50');
+            } catch (err) {
+                setCopyButtonState(button, 'Failed', '#f44336');
+            }
+        }
+        
+        function setCopyButtonState(button, text, color) {
+            button.dataset.status = text;
+            button.style.backgroundColor = color;
+            button.classList.add('showStatus');
+            
             setTimeout(() => {
-                // 模拟上传完成，生成图片的 URL
-                const uploadedUrl = URL.createObjectURL(file);
-                imageUrl.textContent = uploadedUrl;
-
-                spinner.style.display = 'none';
-                urlActions.style.display = 'block';
-
-                activeUploads--;
-            }, 3000); // 模拟3秒上传时间
+                button.style.backgroundColor = '';
+                button.classList.remove('showStatus');
+            }, 500);
         }
     </script>
 </body>
