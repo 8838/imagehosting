@@ -104,12 +104,12 @@
         }
         #imagesList {
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             margin-top: 20px;
         }
         .image-item {
             display: flex;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             background-color: #fff;
             border-radius: 8px;
             overflow: hidden;
@@ -123,8 +123,8 @@
             }
         }
         .image-preview {
-            width: 120px;
-            height: 250px;
+            width: 80px;
+            height: 150px;
             flex-shrink: 0;
             overflow: hidden;
             display: flex;
@@ -145,7 +145,7 @@
         }
         .image-info {
             flex-grow: 1;
-            padding: 5px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -153,9 +153,9 @@
         }
         .image-url {
             background-color: #f1f1f1;
-            padding: 5px;
+            padding: 10px;
             border-radius: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-family: monospace;
             word-break: break-all;
             transition: background-color 0.3s;
@@ -169,20 +169,20 @@
         }
         .url-actions {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
+            justify-content: space-between;
             width: 100%;
-            gap: 3px;
         }
         .copy-btn {
             background-color: #6a0dad;
             color: white;
-            padding: 8px 15px;
+            padding: 6px 10px;
             border: none;
             border-radius: 5px;
             font-size: 15px;
             cursor: pointer;
-            width: 100%;
+            min-width: 80px;
             position: relative;
             transition: background-color 0.3s;
         }
@@ -216,18 +216,18 @@
             opacity: 1;
         }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #6a0dad;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6a0dad;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
-            margin: 15px auto;
+            margin: 10px auto;
         }
         @media (prefers-color-scheme: dark) {
             .spinner {
-                border: 4px solid #444;
-                border-top: 4px solid #9b6dff;
+                border: 3px solid #444;
+                border-top: 3px solid #9b6dff;
             }
         }
         @keyframes spin {
