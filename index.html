@@ -115,6 +115,7 @@
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: background-color 0.3s;
+            flex-direction: column; /* 改为纵向排列 */
         }
         @media (prefers-color-scheme: dark) {
             .image-item {
@@ -123,8 +124,8 @@
             }
         }
         .image-preview {
-            width: 80px;
-            height: 150px;
+            width: 100%; /* 调整为100%宽度 */
+            height: 200px; /* 调整高度 */
             flex-shrink: 0;
             overflow: hidden;
             display: flex;
@@ -150,24 +151,22 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+            box-sizing: border-box;
         }
         .image-url {
             background-color: #f1f1f1;
-            padding: 10px 2px;
+            padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
             font-family: monospace;
             transition: background-color 0.3s;
             text-align: center;
             width: 100%;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* 新增属性，防止内容换行并实现水平滚动 */
-            white-space: nowrap;
+            box-sizing: border-box;
             overflow-x: auto;
-            overflow-y: hidden;
+            white-space: nowrap;
+            display: block; /* 从flex改为block */
         }
         @media (prefers-color-scheme: dark) {
             .image-url {
@@ -181,20 +180,27 @@
             justify-content: space-between;
             width: 100%;
             margin: 10px 0;
-            flex: 1;
         }
         .copy-btn {
             background-color: #6a0dad;
             color: white;
-            padding: 3px 5px;
+            padding: 8px 10px;
             border: none;
             border-radius: 5px;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
-            min-width: 60px;
+            flex: 1;
+            margin: 0 5px;
             position: relative;
             transition: background-color 0.3s;
-            margin: 0;
+            text-align: center;
+            min-width: 0; /* 移除最小宽度 */
+        }
+        .copy-btn:first-child {
+            margin-left: 0;
+        }
+        .copy-btn:last-child {
+            margin-right: 0;
         }
         @media (prefers-color-scheme: dark) {
             .copy-btn {
@@ -209,6 +215,11 @@
         }
         .copy-btn span {
             transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            display: inline-block;
         }
         .copy-btn::after {
             content: attr(data-status);
@@ -270,6 +281,35 @@
         .max-files-notice.show {
             opacity: 1;
             transform: translateY(0);
+        }
+        
+        /* 媒体查询，确保在移动设备上正确显示 */
+        @media (max-width: 600px) {
+            .image-item {
+                flex-direction: column;
+            }
+            .image-preview {
+                width: 100%;
+                height: 180px;
+            }
+            .image-info {
+                width: 100%;
+            }
+            .url-actions {
+                flex-wrap: wrap;
+            }
+            .copy-btn {
+                margin: 5px;
+                flex-basis: calc(50% - 10px);
+            }
+        }
+        
+        /* 非常小的屏幕 */
+        @media (max-width: 400px) {
+            .copy-btn {
+                flex-basis: 100%;
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
@@ -348,10 +388,8 @@
                 imageInfo.className = 'image-info';
                 const imageUrl = document.createElement('div');
                 imageUrl.className = 'image-url';
-                imageUrl.style.textAlign = 'center';
-                imageUrl.style.display = 'flex';
-                imageUrl.style.justifyContent = 'center';
-                imageUrl.style.alignItems = 'center';
+                imageUrl.style.display = 'none'; // 初始隐藏
+                
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
                 imageInfo.style.position = 'relative';
@@ -392,7 +430,6 @@
                 };
 
                 reader.readAsDataURL(file);
-                imageUrl.style.display = 'none';
             });
         }
 
@@ -430,7 +467,7 @@
                     
                     // Set initial URL display
                     element.url.textContent = data.url;
-                    element.url.style.display = 'flex';
+                    element.url.style.display = 'block'; // 改为block
                     element.actions.style.display = 'flex';
                     
                     // Set up button functionality
@@ -460,7 +497,7 @@
                     };
                 } else {
                     element.url.textContent = data.error || 'Upload failed';
-                    element.url.style.display = 'flex';
+                    element.url.style.display = 'block'; // 改为block
                 }
                 activeUploads--;
                 processQueue();
@@ -469,7 +506,7 @@
                 console.error('Error:', error);
                 element.spinner.style.display = 'none';
                 element.url.textContent = 'An error occurred during upload';
-                element.url.style.display = 'flex';
+                element.url.style.display = 'block'; // 改为block
                 activeUploads--;
                 processQueue();
             });
