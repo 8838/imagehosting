@@ -345,6 +345,10 @@
                 imageInfo.className = 'image-info';
                 const imageUrl = document.createElement('div');
                 imageUrl.className = 'image-url';
+                imageUrl.style.textAlign = 'center';
+                imageUrl.style.display = 'flex';
+                imageUrl.style.justifyContent = 'center';
+                imageUrl.style.alignItems = 'center';
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
                 imageInfo.style.position = 'relative';
@@ -418,7 +422,7 @@
                 element.spinner.style.display = 'none';
                 if (data.url) {
                     element.url.textContent = data.url;
-                    element.url.style.display = 'block';
+                    element.url.style.display = 'flex';
                     element.actions.style.display = 'flex';
                     const buttons = element.actions.querySelectorAll('.copy-btn');
                     buttons[0].onclick = () => copyToClipboard(data.url, buttons[0]);
@@ -426,7 +430,7 @@
                     buttons[2].onclick = () => copyToClipboard(`![image](${data.url})`, buttons[2]);
                 } else {
                     element.url.textContent = data.error || 'Upload failed';
-                    element.url.style.display = 'block';
+                    element.url.style.display = 'flex';
                 }
                 activeUploads--;
                 processQueue();
@@ -435,7 +439,7 @@
                 console.error('Error:', error);
                 element.spinner.style.display = 'none';
                 element.url.textContent = 'An error occurred during upload';
-                element.url.style.display = 'block';
+                element.url.style.display = 'flex';
                 activeUploads--;
                 processQueue();
             });
