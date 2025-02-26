@@ -157,7 +157,6 @@
             border-radius: 5px;
             margin: 10px 0;
             font-family: monospace;
-            word-break: break-all;
             transition: background-color 0.3s;
             text-align: center;
             width: 100%;
@@ -165,6 +164,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* 新增属性，防止内容换行并实现水平滚动 */
+            white-space: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         @media (prefers-color-scheme: dark) {
             .image-url {
