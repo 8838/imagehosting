@@ -115,7 +115,6 @@
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: background-color 0.3s;
-            flex-direction: column; /* 改为纵向排列 */
         }
         @media (prefers-color-scheme: dark) {
             .image-item {
@@ -124,8 +123,8 @@
             }
         }
         .image-preview {
-            width: 100%; /* 调整为100%宽度 */
-            height: 200px; /* 调整高度 */
+            width: 80px;
+            height: 150px;
             flex-shrink: 0;
             overflow: hidden;
             display: flex;
@@ -151,12 +150,13 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            width: calc(100% - 80px);
             box-sizing: border-box;
+            min-width: 0;
         }
         .image-url {
             background-color: #f1f1f1;
-            padding: 10px;
+            padding: 10px 2px;
             border-radius: 5px;
             margin: 10px 0;
             font-family: monospace;
@@ -164,9 +164,9 @@
             text-align: center;
             width: 100%;
             box-sizing: border-box;
-            overflow-x: auto;
             white-space: nowrap;
-            display: block; /* 从flex改为block */
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         @media (prefers-color-scheme: dark) {
             .image-url {
@@ -180,21 +180,22 @@
             justify-content: space-between;
             width: 100%;
             margin: 10px 0;
+            flex-wrap: wrap;
         }
         .copy-btn {
             background-color: #6a0dad;
             color: white;
-            padding: 8px 10px;
+            padding: 8px 0;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
-            flex: 1;
-            margin: 0 5px;
             position: relative;
             transition: background-color 0.3s;
-            text-align: center;
-            min-width: 0; /* 移除最小宽度 */
+            flex: 1;
+            margin: 0 2px;
+            min-width: 0;
+            overflow: hidden;
         }
         .copy-btn:first-child {
             margin-left: 0;
@@ -215,11 +216,10 @@
         }
         .copy-btn span {
             transition: opacity 0.3s ease;
+            display: block;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
-            display: inline-block;
         }
         .copy-btn::after {
             content: attr(data-status);
@@ -283,8 +283,7 @@
             transform: translateY(0);
         }
         
-        /* 媒体查询，确保在移动设备上正确显示 */
-        @media (max-width: 600px) {
+        @media (max-width: 500px) {
             .image-item {
                 flex-direction: column;
             }
@@ -299,16 +298,8 @@
                 flex-wrap: wrap;
             }
             .copy-btn {
-                margin: 5px;
-                flex-basis: calc(50% - 10px);
-            }
-        }
-        
-        /* 非常小的屏幕 */
-        @media (max-width: 400px) {
-            .copy-btn {
                 flex-basis: 100%;
-                margin: 5px 0;
+                margin: 2px 0;
             }
         }
     </style>
@@ -388,7 +379,7 @@
                 imageInfo.className = 'image-info';
                 const imageUrl = document.createElement('div');
                 imageUrl.className = 'image-url';
-                imageUrl.style.display = 'none'; // 初始隐藏
+                imageUrl.style.display = 'none';
                 
                 const spinner = document.createElement('div');
                 spinner.className = 'spinner';
@@ -462,25 +453,20 @@
             .then(data => {
                 element.spinner.style.display = 'none';
                 if (data.url) {
-                    // Store original URL for future reference
                     element.item.dataset.originalUrl = data.url;
                     
-                    // Set initial URL display
                     element.url.textContent = data.url;
-                    element.url.style.display = 'block'; // 改为block
+                    element.url.style.display = 'block';
                     element.actions.style.display = 'flex';
                     
-                    // Set up button functionality
                     const buttons = element.actions.querySelectorAll('.copy-btn');
                     
-                    // URL button
                     buttons[0].onclick = () => {
                         copyToClipboard(data.url, buttons[0]);
                         updateUrlDisplay(element.url, data.url);
                         highlightActiveButton(element.actions, 'url');
                     };
                     
-                    // BBCode button
                     buttons[1].onclick = () => {
                         const bbCode = `[img]${data.url}[/img]`;
                         copyToClipboard(bbCode, buttons[1]);
@@ -488,7 +474,6 @@
                         highlightActiveButton(element.actions, 'bbcode');
                     };
                     
-                    // Markdown button
                     buttons[2].onclick = () => {
                         const markdown = `![image](${data.url})`;
                         copyToClipboard(markdown, buttons[2]);
@@ -497,7 +482,7 @@
                     };
                 } else {
                     element.url.textContent = data.error || 'Upload failed';
-                    element.url.style.display = 'block'; // 改为block
+                    element.url.style.display = 'block';
                 }
                 activeUploads--;
                 processQueue();
@@ -506,7 +491,7 @@
                 console.error('Error:', error);
                 element.spinner.style.display = 'none';
                 element.url.textContent = 'An error occurred during upload';
-                element.url.style.display = 'block'; // 改为block
+                element.url.style.display = 'block';
                 activeUploads--;
                 processQueue();
             });
@@ -526,7 +511,6 @@
                 }
             });
             
-            // Reset button colors after a delay
             setTimeout(() => {
                 buttons.forEach(button => {
                     button.style.backgroundColor = '';
